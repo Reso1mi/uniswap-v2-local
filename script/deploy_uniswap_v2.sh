@@ -46,6 +46,18 @@ ROUTER_ADDRESS=$(forge create \
   --constructor-args $FACTORY_ADDRESS $WETH_ADDRESS | grep "Deployed to:" | awk '{print $3}')
 echo "Router deployed at: $ROUTER_ADDRESS"
 
+
+# ------------------------
+# 4️⃣ 部署 Multicall
+# ------------------------
+echo "Deploying Multicall..."
+MULTICALL_ADDRESS=$(forge create \
+  --rpc-url $RPC_URL \
+  --private-key $PRIVATE_KEY \
+  --broadcast \
+  src/Multicall3.sol:Multicall3 | grep "Deployed to:" | awk '{print $3}')
+echo "Multicall deployed at: $MULTICALL_ADDRESS"
+
 # ------------------------
 # 4️⃣ 部署两个测试代币
 # ------------------------
@@ -92,6 +104,7 @@ ALL_PAIRS_LENGTH=$(cast call $FACTORY_ADDRESS "allPairsLength()(uint256)" --rpc-
 echo "All pairs length: $ALL_PAIRS_LENGTH"
 
 echo "✅ Uniswap V2 deployment and liquidity provision completed!"
+echo "MULTICALL_ADDRESS: $MULTICALL_ADDRESS"
 echo "Factory: $FACTORY_ADDRESS"
 echo "Router : $ROUTER_ADDRESS"
 echo "WETH   : $WETH_ADDRESS"
