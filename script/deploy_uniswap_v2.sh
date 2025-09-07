@@ -67,6 +67,29 @@ TOKENB_ADDRESS=$(forge create \
   --constructor-args "Token B" "TKB" $TOKEN_SUPPLY | grep "Deployed to:" | awk '{print $3}')
 echo "TokenB deployed at: $TOKENB_ADDRESS"
 
+# ------------------------
+# 5️⃣ 给 Router 授权代币
+# ------------------------
+echo "Approving tokens to Router..."
+cast send $TOKENA_ADDRESS "approve(address,uint256)" $ROUTER_ADDRESS $LIQUIDITY_AMOUNT --private-key $PRIVATE_KEY --rpc-url $RPC_URL
+cast send $TOKENB_ADDRESS "approve(address,uint256)" $ROUTER_ADDRESS $LIQUIDITY_AMOUNT --private-key $PRIVATE_KEY --rpc-url $RPC_URL
+
+# ------------------------
+# 6️⃣ 添加流动性
+# ------------------------
+echo "Adding liquidity..."
+cast send $ROUTER_ADDRESS "addLiquidity(address,address,uint256,uint256,uint256,uint256,address,uint256)" \
+    $TOKENA_ADDRESS $TOKENB_ADDRESS $LIQUIDITY_AMOUNT $LIQUIDITY_AMOUNT 0 0 $ACCOUNT $(( $(date +%s) + 600 )) \
+    --private-key $PRIVATE_KEY \
+    --rpc-url $RPC_URL
+
+echo "✅ Liquidity added!"
+
+PAIR_ADDRESS=$(cast call $FACTORY_ADDRESS "getPair(address,address)(address)" $TOKENA_ADDRESS $TOKENB_ADDRESS --rpc-url $RPC_URL)
+echo "Pair address: $PAIR_ADDRESS"
+
+ALL_PAIRS_LENGTH=$(cast call $FACTORY_ADDRESS "allPairsLength()(uint256)" --rpc-url $RPC_URL)
+echo "All pairs length: $ALL_PAIRS_LENGTH"
 
 echo "✅ Uniswap V2 deployment and liquidity provision completed!"
 echo "Factory: $FACTORY_ADDRESS"
